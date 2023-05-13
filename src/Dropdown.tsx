@@ -71,7 +71,6 @@ interface DropdownItem {
   emoji: string;
 }
 
-
 const initialItems: DropdownItem[] = [
   {
     title: "Science",
@@ -106,21 +105,21 @@ const useDropdown = (initialItems: DropdownItem[]) => {
   const [searchValue, setSearchValue] = useState<string>("");
   const [isOpen, setIsOpen] = useState<boolean>(false);
 
-  useEffect(() => {
-    if (searchValue === "") {
-      setSelectedItem(null);
-      setItems(initialItems);
-    } else {
-      const filteredItems = initialItems.filter((item) =>
-        item.title.toLowerCase().includes(searchValue.toLowerCase())
-      );
-      setItems(filteredItems);
-    }
-  }, [searchValue]);
-
   const handleSelectItem = (item: DropdownItem) => {
     setSelectedItem(item);
     setIsOpen(false);
+  };
+
+  const handleAddItem = (newItem: string) => {
+    const newDropdownItem: DropdownItem = {
+      title: newItem,
+      subItems: [],
+      emoji: "🆕", // or any default emoji you want
+    };
+
+    setItems((prevItems) => [...prevItems, newDropdownItem]);
+    setSelectedItem(newDropdownItem);
+    setSearchValue("");
   };
 
   return {
@@ -131,6 +130,7 @@ const useDropdown = (initialItems: DropdownItem[]) => {
     setSearchValue,
     setIsOpen,
     handleSelectItem,
+    handleAddItem,
   };
 };
 
@@ -143,9 +143,21 @@ const Dropdown: React.FC = () => {
     setSearchValue,
     setIsOpen,
     handleSelectItem,
+    handleAddItem,
   } = useDropdown(initialItems);
 
   const classes = useStyles();
+
+  const handleKeyPress = (event: React.KeyboardEvent<HTMLInputElement>) => {
+    if (event.key === "Enter" && searchValue.trim() !== "") {
+      handleAddItem(searchValue);
+      event.preventDefault();
+    }
+  };
+
+  const filteredItems = items.filter((item) =>
+    item.title.toLowerCase().includes(searchValue.toLowerCase())
+  );
 
   return (
     <div className={classes.dropdown}>
@@ -153,6 +165,7 @@ const Dropdown: React.FC = () => {
         type="text"
         value={searchValue}
         onChange={(e) => setSearchValue(e.target.value)}
+        onKeyPress={handleKeyPress}
         onClick={() => setIsOpen(true)}
         className={classes.input}
         placeholder={`Search...`}
@@ -160,7 +173,7 @@ const Dropdown: React.FC = () => {
 
       {isOpen && (
         <div className={classes.dropdownItems}>
-          {items.map((item, index) => (
+          {filteredItems.map((item, index) => (
             <div
               key={index}
               className={`${classes.dropdownItem} ${
