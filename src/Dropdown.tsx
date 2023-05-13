@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { createUseStyles } from "react-jss";
-import { FaCheck, FaAngleDown, FaAngleUp } from "react-icons/fa";
+import { FaCheck } from "react-icons/fa";
 
 const useStyles = createUseStyles({
   dropdown: {
@@ -71,6 +71,7 @@ interface DropdownItem {
   emoji: string;
 }
 
+
 const initialItems: DropdownItem[] = [
   {
     title: "Science",
@@ -99,12 +100,11 @@ const initialItems: DropdownItem[] = [
   },
 ];
 
-const Dropdown: React.FC = () => {
+const useDropdown = (initialItems: DropdownItem[]) => {
   const [items, setItems] = useState<DropdownItem[]>(initialItems);
   const [selectedItem, setSelectedItem] = useState<DropdownItem | null>(null);
   const [searchValue, setSearchValue] = useState<string>("");
   const [isOpen, setIsOpen] = useState<boolean>(false);
-  const classes = useStyles();
 
   useEffect(() => {
     if (searchValue === "") {
@@ -122,6 +122,30 @@ const Dropdown: React.FC = () => {
     setSelectedItem(item);
     setIsOpen(false);
   };
+
+  return {
+    items,
+    selectedItem,
+    searchValue,
+    isOpen,
+    setSearchValue,
+    setIsOpen,
+    handleSelectItem,
+  };
+};
+
+const Dropdown: React.FC = () => {
+  const {
+    items,
+    selectedItem,
+    searchValue,
+    isOpen,
+    setSearchValue,
+    setIsOpen,
+    handleSelectItem,
+  } = useDropdown(initialItems);
+
+  const classes = useStyles();
 
   return (
     <div className={classes.dropdown}>
